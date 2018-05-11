@@ -2,6 +2,8 @@
 
 logfile="/var/log/aws_userdata.log"
 
+echo "$(date) == start of user data script" >> $logfile
+
 set -o errexit
 set -o pipefail
 set -o nounset
@@ -62,15 +64,18 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --description "Docker Runner" \
   --docker-image "ruby:2.4" \
   --docker-volumes /var/run/docker.sock:/var/run/docker.sock\
-  --tag-list ${gitlab_runner_tags}
+  --tag-list ${gitlab_runner_tags} >> $logfile
 
 REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --url ${gitlab_url} \
   --registration-token ${gitlab_runner_registration_token} \
   --executor shell \
-  --tag-list shell 
+  --tag-list shell >> $logfile
 
 #### AWS ECR Register
-sudo su gitlab-runner
-docker_login=$(aws ecr get-login --no-include-email --region ${aws_region})
-eval $docker_login
+echo "docker login start" >> $logfile
+sudo su gitlab-runner -c "aws ecr get-login --no-include-email --region ${aws_region}" > /tmp/docker_login
+sudo su gitlab-runner -c "/bin/bash /tmp/docker_login" >> $logfile
+echo "docker login end" >> $logfile
+
+echo "$(date) == end of user data script" >> $logfile
