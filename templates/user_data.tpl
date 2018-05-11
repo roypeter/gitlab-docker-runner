@@ -61,7 +61,6 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --url ${gitlab_url} \
   --registration-token ${gitlab_runner_registration_token} \
   --executor docker \
-  --description "Docker Runner" \
   --docker-image "ruby:2.4" \
   --docker-volumes /var/run/docker.sock:/var/run/docker.sock\
   --tag-list ${gitlab_runner_tags} >> $logfile
