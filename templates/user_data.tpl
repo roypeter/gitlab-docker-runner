@@ -6,8 +6,8 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-echo 'Install Docker'
 
+#### Docker
 apt-get update
 
 apt-get -y install \
@@ -27,10 +27,16 @@ add-apt-repository \
    stable"
 
 apt-get update
-
 apt-get -y install docker-ce >> $logfile
 
-echo 'Install Gitlab Runner'
+#### AWS ECR
+apt-get install -y python-pip >> $logfile
+pip install -U pip >> $logfile
+/usr/local/bin/pip install awscli >> $logfile
+docker_login=$(aws ecr get-login --no-include-email --region $aws_region)
+eval $docker_login >> $logfile
+
+#### Gitlab Runner
 curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash
 
 cat > /etc/apt/preferences.d/pin-gitlab-runner.pref <<EOF
@@ -49,11 +55,17 @@ EOF
 
 systemctl restart gitlab-runner.service >> $logfile
 
-DOCKER_IMAGE="ruby:2.4" REGISTER_LOCKED=false gitlab-runner register \
-  --non-interactive \
+REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --url ${gitlab_url} \
-  --executor docker \
   --registration-token ${gitlab_runner_registration_token} \
-  --tag-list ${gitlab_runner_tags} \
-  --run-untagged false ${gitlab_runner_other_register_options} >> $logfile
+  --executor docker \
+  --description "Docker Runner" \
+  --docker-image "ruby:2.4" \
+  --docker-volumes /var/run/docker.sock:/var/run/docker.sock\
+  --tag-list ${gitlab_runner_tags}
 
+REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
+  --url ${gitlab_url} \
+  --registration-token ${gitlab_runner_registration_token} \
+  --executor shell \
+  --tag-list shell 

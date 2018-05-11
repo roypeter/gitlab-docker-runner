@@ -17,12 +17,12 @@ data "aws_ami" "ubuntu" {
 data "template_file" "user_data" {
   template = "${file("${path.module}/templates/user_data.tpl")}"
   vars {
+    aws_region = "${data.aws_region.current.name}"
     gitlab_url = "${var.gitlab_url}"
     gitlab_runner_registration_token = "${var.gitlab_runner_registration_token}"
     gitlab_runner_version = "${var.gitlab_runner_version}"
     gitlab_runner_tags = "${var.gitlab_runner_tags}"
     gitlab_runner_concurent_builds = "${var.gitlab_runner_concurent_builds}"
-    gitlab_runner_other_register_options = "${var.gitlab_runner_other_register_options}"
   }
 }
 
@@ -32,6 +32,8 @@ data "aws_subnet" "ec2" {
     values = ["*${var.aws_ec2_subnet_tag_name}*"]
   }
 }
+
+data "aws_region" "current" {}
 
 resource "aws_security_group" "ec2" {
   name        = "${var.project_name}-ec2"
@@ -92,6 +94,7 @@ resource "aws_iam_role_policy" "ecr" {
             "Effect": "Allow",
             "Action": [
                 "ecr:GetDownloadUrlForLayer",
+                "ecr:GetAuthorizationToken",
                 "ecr:BatchGetImage",
                 "ecr:CompleteLayerUpload",
                 "ecr:DescribeImages",
