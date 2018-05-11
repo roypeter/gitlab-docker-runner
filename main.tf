@@ -94,7 +94,6 @@ resource "aws_iam_role_policy" "ecr" {
             "Effect": "Allow",
             "Action": [
                 "ecr:GetDownloadUrlForLayer",
-                "ecr:GetAuthorizationToken",
                 "ecr:BatchGetImage",
                 "ecr:CompleteLayerUpload",
                 "ecr:DescribeImages",
@@ -106,6 +105,12 @@ resource "aws_iam_role_policy" "ecr" {
                 "ecr:PutImage"
             ],
             "Resource": "arn:aws:ecr:*:*:repository/*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "ecr:GetAuthorizationToken",
+            "Resource": "*"
         }
     ]
 }
