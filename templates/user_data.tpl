@@ -55,5 +55,5 @@ DOCKER_IMAGE="ruby:2.4" REGISTER_LOCKED=false gitlab-runner register \
   --executor docker \
   --registration-token ${gitlab_runner_registration_token} \
   --tag-list ${gitlab_runner_tags} \
-  --run-untagged false >> $logfile
+  --run-untagged false ${gitlab_runner_other_register_options} >> $logfile
 

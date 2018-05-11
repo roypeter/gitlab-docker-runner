@@ -22,6 +22,7 @@ data "template_file" "user_data" {
     gitlab_runner_version = "${var.gitlab_runner_version}"
     gitlab_runner_tags = "${var.gitlab_runner_tags}"
     gitlab_runner_concurent_builds = "${var.gitlab_runner_concurent_builds}"
+    gitlab_runner_other_register_options = "${var.gitlab_runner_other_register_options}"
   }
 }
 

@@ -54,3 +54,9 @@ variable "gitlab_runner_count" {
   description = "Numbre of ec2 instances for runner"
   default = 1
 }
+
+variable "gitlab_runner_other_register_options" {
+  description = "pass additional options while running register command(space separated). example:  --docker-privileged"
+  default = ""
+}
+
