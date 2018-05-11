@@ -33,8 +33,6 @@ apt-get -y install docker-ce >> $logfile
 apt-get install -y python-pip >> $logfile
 pip install -U pip >> $logfile
 /usr/local/bin/pip install awscli >> $logfile
-docker_login=$(aws ecr get-login --no-include-email --region $aws_region)
-eval $docker_login >> $logfile
 
 #### Gitlab Runner
 curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash
@@ -55,6 +53,8 @@ EOF
 
 systemctl restart gitlab-runner.service >> $logfile
 
+usermod -aG docker gitlab-runner
+
 REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --url ${gitlab_url} \
   --registration-token ${gitlab_runner_registration_token} \
@@ -69,3 +69,8 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --registration-token ${gitlab_runner_registration_token} \
   --executor shell \
   --tag-list shell 
+
+#### AWS ECR Register
+sudo su gitlab-runner
+docker_login=$(aws ecr get-login --no-include-email --region $aws_region)
+eval $docker_login
