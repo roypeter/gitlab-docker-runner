@@ -53,8 +53,65 @@ resource "aws_security_group" "ec2" {
   }
 }
 
+resource "aws_iam_instance_profile" "gitlab_runner" {
+  name = "${var.project_name}"
+  role = "${aws_iam_role.role.name}"
+}
+
+resource "aws_iam_role" "role" {
+  name = "${var.project_name}"
+  path = "/"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "sts:AssumeRole",
+            "Principal": {
+               "Service": "ec2.amazonaws.com"
+            },
+            "Effect": "Allow",
+            "Sid": ""
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "ecr" {
+  name = "${var.project_name}-ecr"
+  role = "${aws_iam_role.role.id}"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:CompleteLayerUpload",
+                "ecr:DescribeImages",
+                "ecr:DescribeRepositories",
+                "ecr:UploadLayerPart",
+                "ecr:ListImages",
+                "ecr:InitiateLayerUpload",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage"
+            ],
+            "Resource": "arn:aws:ecr:*:*:repository/*"
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_instance" "ec2" {
   count = "${var.gitlab_runner_count}"
+  iam_instance_profile = "${aws_iam_instance_profile.gitlab_runner.id}" 
   ami           = "${data.aws_ami.ubuntu.id}"
   instance_type = "${var.aws_ec2_instance_type}"
   subnet_id     = "${data.aws_subnet.ec2.id}"
