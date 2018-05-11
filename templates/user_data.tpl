@@ -72,5 +72,5 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
 
 #### AWS ECR Register
 sudo su gitlab-runner
-docker_login=$(aws ecr get-login --no-include-email --region $aws_region)
+docker_login=$(aws ecr get-login --no-include-email --region ${aws_region})
 eval $docker_login
