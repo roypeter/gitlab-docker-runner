@@ -75,6 +75,7 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
 echo "docker login start" >> $logfile
 sudo su gitlab-runner -c "aws ecr get-login --no-include-email --region ${aws_region}" > /tmp/docker_login
 sudo su gitlab-runner -c "/bin/bash /tmp/docker_login" >> $logfile
+rm -f /tmp/docker_login
 echo "docker login end" >> $logfile
 
 echo "$(date) == end of user data script" >> $logfile
