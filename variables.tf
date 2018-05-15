@@ -54,3 +54,7 @@ variable "gitlab_runner_count" {
   description = "Numbre of ec2 instances for runner"
   default = 1
 }
+
+variable "gcloud_service_account" {
+  description = "base64 encoded gcloud service account string"
+}

@@ -23,6 +23,7 @@ data "template_file" "user_data" {
     gitlab_runner_version = "${var.gitlab_runner_version}"
     gitlab_runner_tags = "${var.gitlab_runner_tags}"
     gitlab_runner_concurent_builds = "${var.gitlab_runner_concurent_builds}"
+    gcloud_service_account = "${var.gcloud_service_account}"
   }
 }
 
@@ -109,7 +110,10 @@ resource "aws_iam_role_policy" "ecr" {
         {
             "Sid": "VisualEditor1",
             "Effect": "Allow",
-            "Action": "ecr:GetAuthorizationToken",
+            "Action": [
+                "ecr:CreateRepository",
+                "ecr:GetAuthorizationToken"
+            ],
             "Resource": "*"
         }
     ]

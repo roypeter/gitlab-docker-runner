@@ -36,6 +36,13 @@ apt-get install -y python-pip >> $logfile
 pip install -U pip >> $logfile
 /usr/local/bin/pip install awscli >> $logfile
 
+#### Gcloud cli
+export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+apt-get update && sudo apt-get install -y google-cloud-sdk
+apt-get install -y kubectl
+
 #### Gitlab Runner
 curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh | sudo bash
 
@@ -71,11 +78,10 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --executor shell \
   --tag-list shell >> $logfile
 
-#### AWS ECR Register
-echo "docker login start" >> $logfile
-sudo su gitlab-runner -c "aws ecr get-login --no-include-email --region ${aws_region}" > /tmp/docker_login
-sudo su gitlab-runner -c "/bin/bash /tmp/docker_login" >> $logfile
-rm -f /tmp/docker_login
-echo "docker login end" >> $logfile
+### Gcloud auth
+echo ${gcloud_service_account} | base64 -d >  /tmp/gitlabrunnersvcaccount.json
+sudo -H -u gitlab-runner bash -c 'gcloud auth activate-service-account --key-file /tmp/gitlabrunnersvcaccount.json' >> $logfile
+sudo -H -u gitlab-runner bash -c 'gcloud auth configure-docker  --configuration /tmp/gitlabrunnersvcaccount.json --quiet' >> $logfile
+rm -rf /tmp/gitlabrunnersvcaccount.json
 
 echo "$(date) == end of user data script" >> $logfile
