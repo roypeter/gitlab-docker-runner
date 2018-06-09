@@ -64,6 +64,12 @@ systemctl restart gitlab-runner.service >> $logfile
 
 usermod -aG docker gitlab-runner
 
+### Gcloud auth
+echo ${gcloud_service_account} | base64 -d >  /tmp/gitlabrunnersvcaccount.json
+sudo -H -u gitlab-runner bash -c 'gcloud auth activate-service-account --key-file /tmp/gitlabrunnersvcaccount.json' >> $logfile
+sudo -H -u gitlab-runner bash -c 'gcloud auth configure-docker  --configuration /tmp/gitlabrunnersvcaccount.json --quiet' >> $logfile
+rm -rf /tmp/gitlabrunnersvcaccount.json
+
 REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --url ${gitlab_url} \
   --registration-token ${gitlab_runner_registration_token} \
@@ -78,10 +84,5 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
   --executor shell \
   --tag-list shell >> $logfile
 
-### Gcloud auth
-echo ${gcloud_service_account} | base64 -d >  /tmp/gitlabrunnersvcaccount.json
-sudo -H -u gitlab-runner bash -c 'gcloud auth activate-service-account --key-file /tmp/gitlabrunnersvcaccount.json' >> $logfile
-sudo -H -u gitlab-runner bash -c 'gcloud auth configure-docker  --configuration /tmp/gitlabrunnersvcaccount.json --quiet' >> $logfile
-rm -rf /tmp/gitlabrunnersvcaccount.json
-
 echo "$(date) == end of user data script" >> $logfile
+
