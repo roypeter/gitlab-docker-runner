@@ -86,3 +86,9 @@ REGISTER_LOCKED=false REGISTER_RUN_UNTAGGED=false gitlab-runner register -n \
 
 echo "$(date) == end of user data script" >> $logfile
 
+### Cron to remove unused docker images 
+crontab -l > cron.backup
+echo "0 3 * * * /usr/bin/docker system prune -f" >> cron.backup
+crontab cron.backup
+rm cron.backup
+
