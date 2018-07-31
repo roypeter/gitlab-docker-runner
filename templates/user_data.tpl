@@ -88,7 +88,7 @@ echo "$(date) == end of user data script" >> $logfile
 
 ### Cron to remove unused docker images 
 crontab -l > cron.backup
-echo "0 3 * * * /usr/bin/docker system prune -f" >> cron.backup
+echo "0 3 * * * /usr/bin/docker system prune -f -a" >> cron.backup
 crontab cron.backup
 rm cron.backup
 
